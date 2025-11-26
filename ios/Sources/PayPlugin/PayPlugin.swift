@@ -140,6 +140,10 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
         didSelectShippingMethod shippingMethod: PKShippingMethod,
         handler completion: @escaping (PKPaymentRequestShippingMethodUpdate) -> Void
     ) {
+        print("📦 [PayPlugin] didSelectShippingMethod called")
+        print("📦 [PayPlugin] Method identifier: \(shippingMethod.identifier ?? "nil")")
+        print("📦 [PayPlugin] Method label: \(shippingMethod.label)")
+
         // Store the completion handler to be called from JavaScript
         shippingMethodUpdateHandler = completion
 
@@ -151,8 +155,12 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
             "detail": shippingMethod.detail ?? ""
         ]
 
+        print("📦 [PayPlugin] Notifying JS with data: \(methodData)")
+
         // Notify JavaScript listeners
         notifyListeners("applePayShippingMethodSelected", data: methodData)
+
+        print("📦 [PayPlugin] JS notification sent")
     }
 
     // MARK: - Capacitor Methods
@@ -180,6 +188,10 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
                 let shippingMethods = parseShippingMethods(from: shippingMethodsRaw)
                 if !shippingMethods.isEmpty {
                     update.shippingMethods = shippingMethods
+                    print("📦 [PayPlugin] Setting \(shippingMethods.count) shipping methods")
+                    for method in shippingMethods {
+                        print("📦 [PayPlugin] Method: \(method.label) (\(method.identifier ?? "no id"))")
+                    }
                 }
             }
 
