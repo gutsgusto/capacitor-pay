@@ -248,6 +248,18 @@ export interface PayPlugin {
      */
     addListener(eventName: 'applePayShippingContactSelected', listenerFunc: (contact: ApplePayContact) => void): Promise<PluginListenerHandle>;
     /**
+     * Add a listener for Apple Pay shipping method selection events.
+     * This event fires when the user selects or changes their shipping method
+     * during the Apple Pay flow. Use this to recalculate the total cost based
+     * on the selected shipping method and call updateShippingCosts() with the new amounts.
+     *
+     * @param eventName The event name 'applePayShippingMethodSelected'
+     * @param listenerFunc Callback function that receives the selected shipping method
+     * @returns Promise that resolves with a listener handle for removal
+     * @since 7.2.0
+     */
+    addListener(eventName: 'applePayShippingMethodSelected', listenerFunc: (shippingMethod: ApplePayShippingMethod) => void): Promise<PluginListenerHandle>;
+    /**
      * Remove all native listeners for this plugin
      */
     removeAllListeners(): Promise<void>;

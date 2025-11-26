@@ -19,6 +19,7 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
     private var pendingApplePayment: PKPayment?
     private var applePayController: PKPaymentAuthorizationController?
     private var shippingContactUpdateHandler: ((PKPaymentRequestShippingContactUpdate) -> Void)?
+    private var shippingMethodUpdateHandler: ((PKPaymentRequestShippingMethodUpdate) -> Void)?
 
     @objc func isPayAvailable(_ call: CAPPluginCall) {
         let appleOptions = call.getObject("apple") ?? [:]
@@ -134,14 +135,29 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
         notifyListeners("applePayShippingContactSelected", data: contactData)
     }
 
+    public func paymentAuthorizationController(
+        _ controller: PKPaymentAuthorizationController,
+        didSelectShippingMethod shippingMethod: PKShippingMethod,
+        handler completion: @escaping (PKPaymentRequestShippingMethodUpdate) -> Void
+    ) {
+        // Store the completion handler to be called from JavaScript
+        shippingMethodUpdateHandler = completion
+
+        // Build shipping method dictionary to send to JavaScript
+        let methodData: [String: Any] = [
+            "identifier": shippingMethod.identifier ?? "",
+            "label": shippingMethod.label,
+            "amount": shippingMethod.amount.stringValue,
+            "detail": shippingMethod.detail ?? ""
+        ]
+
+        // Notify JavaScript listeners
+        notifyListeners("applePayShippingMethodSelected", data: methodData)
+    }
+
     // MARK: - Capacitor Methods
 
     @objc func updateShippingCosts(_ call: CAPPluginCall) {
-        guard let handler = shippingContactUpdateHandler else {
-            call.reject("No shipping contact selection in progress")
-            return
-        }
-
         // Get updated payment summary items from JavaScript
         guard let summaryItemsRaw = call.getValue("paymentSummaryItems") else {
             call.reject("paymentSummaryItems is required")
@@ -154,22 +170,37 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
             return
         }
 
-        // Create the update with new summary items
-        let update = PKPaymentRequestShippingContactUpdate(paymentSummaryItems: summaryItems)
+        // Check which handler is active - shipping contact or shipping method
+        if let contactHandler = shippingContactUpdateHandler {
+            // Create the update with new summary items
+            let update = PKPaymentRequestShippingContactUpdate(paymentSummaryItems: summaryItems)
 
-        // Optionally handle shipping methods if provided
-        if let shippingMethodsRaw = call.getValue("shippingMethods") {
-            let shippingMethods = parseShippingMethods(from: shippingMethodsRaw)
-            if !shippingMethods.isEmpty {
-                update.shippingMethods = shippingMethods
+            // Optionally handle shipping methods if provided
+            if let shippingMethodsRaw = call.getValue("shippingMethods") {
+                let shippingMethods = parseShippingMethods(from: shippingMethodsRaw)
+                if !shippingMethods.isEmpty {
+                    update.shippingMethods = shippingMethods
+                }
             }
+
+            // Call the handler to update Apple Pay sheet
+            contactHandler(update)
+
+            // Clear the handler
+            shippingContactUpdateHandler = nil
+        } else if let methodHandler = shippingMethodUpdateHandler {
+            // Create the update for shipping method change
+            let update = PKPaymentRequestShippingMethodUpdate(paymentSummaryItems: summaryItems)
+
+            // Call the handler to update Apple Pay sheet
+            methodHandler(update)
+
+            // Clear the handler
+            shippingMethodUpdateHandler = nil
+        } else {
+            call.reject("No shipping selection in progress")
+            return
         }
-
-        // Call the handler to update Apple Pay sheet
-        handler(update)
-
-        // Clear the handler
-        shippingContactUpdateHandler = nil
 
         call.resolve()
     }

@@ -128,6 +128,7 @@ if (availability.platform === 'ios') {
 * [`updateShippingCosts(...)`](#updateshippingcosts)
 * [`getPluginVersion()`](#getpluginversion)
 * [`addListener('applePayShippingContactSelected', ...)`](#addlistenerapplepayshippingcontactselected-)
+* [`addListener('applePayShippingMethodSelected', ...)`](#addlistenerapplepayshippingmethodselected-)
 * [`removeAllListeners()`](#removealllisteners)
 * [Interfaces](#interfaces)
 * [Type Aliases](#type-aliases)
@@ -221,6 +222,29 @@ call updateShippingCosts() with the new amounts.
 | ------------------ | --------------------------------------------------------------------------------- | ------------------------------------------------------------- |
 | **`eventName`**    | <code>'applePayShippingContactSelected'</code>                                    | The event name 'applePayShippingContactSelected'              |
 | **`listenerFunc`** | <code>(contact: <a href="#applepaycontact">ApplePayContact</a>) =&gt; void</code> | Callback function that receives the selected shipping contact |
+
+**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt;</code>
+
+**Since:** 7.2.0
+
+--------------------
+
+
+### addListener('applePayShippingMethodSelected', ...)
+
+```typescript
+addListener(eventName: 'applePayShippingMethodSelected', listenerFunc: (shippingMethod: ApplePayShippingMethod) => void) => Promise<PluginListenerHandle>
+```
+
+Add a listener for Apple Pay shipping method selection events.
+This event fires when the user selects or changes their shipping method
+during the Apple Pay flow. Use this to recalculate the total cost based
+on the selected shipping method and call updateShippingCosts() with the new amounts.
+
+| Param              | Type                                                                                                   | Description                                                  |
+| ------------------ | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
+| **`eventName`**    | <code>'applePayShippingMethodSelected'</code>                                                          | The event name 'applePayShippingMethodSelected'              |
+| **`listenerFunc`** | <code>(shippingMethod: <a href="#applepayshippingmethod">ApplePayShippingMethod</a>) =&gt; void</code> | Callback function that receives the selected shipping method |
 
 **Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt;</code>
 
