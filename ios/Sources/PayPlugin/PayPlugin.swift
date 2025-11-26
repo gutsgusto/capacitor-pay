@@ -5,18 +5,20 @@ import PassKit
 
 @objc(PayPlugin)
 public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationControllerDelegate {
-    private let pluginVersion: String = "7.1.11"
+    private let pluginVersion: String = "7.2.0"
     public let identifier = "PayPlugin"
     public let jsName = "Pay"
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "isPayAvailable", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "requestPayment", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "updateShippingCosts", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "getPluginVersion", returnType: CAPPluginReturnPromise)
     ]
 
     private var pendingApplePayCall: CAPPluginCall?
     private var pendingApplePayment: PKPayment?
     private var applePayController: PKPaymentAuthorizationController?
+    private var shippingContactUpdateHandler: ((PKPaymentRequestShippingContactUpdate) -> Void)?
 
     @objc func isPayAvailable(_ call: CAPPluginCall) {
         let appleOptions = call.getObject("apple") ?? [:]
@@ -115,6 +117,61 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
                 call.reject("Failed to serialize Apple Pay result.", nil, error)
             }
         }
+    }
+
+    public func paymentAuthorizationController(
+        _ controller: PKPaymentAuthorizationController,
+        didSelectShippingContact contact: PKContact,
+        handler completion: @escaping (PKPaymentRequestShippingContactUpdate) -> Void
+    ) {
+        // Store the completion handler to be called from JavaScript
+        shippingContactUpdateHandler = completion
+
+        // Build contact dictionary to send to JavaScript
+        let contactData = contactDictionary(from: contact) ?? [:]
+
+        // Notify JavaScript listeners
+        notifyListeners("applePayShippingContactSelected", data: contactData)
+    }
+
+    // MARK: - Capacitor Methods
+
+    @objc func updateShippingCosts(_ call: CAPPluginCall) {
+        guard let handler = shippingContactUpdateHandler else {
+            call.reject("No shipping contact selection in progress")
+            return
+        }
+
+        // Get updated payment summary items from JavaScript
+        guard let summaryItemsRaw = call.getValue("paymentSummaryItems") else {
+            call.reject("paymentSummaryItems is required")
+            return
+        }
+
+        let summaryItems = paymentSummaryItems(from: summaryItemsRaw)
+        guard !summaryItems.isEmpty else {
+            call.reject("paymentSummaryItems must include at least one item")
+            return
+        }
+
+        // Create the update with new summary items
+        let update = PKPaymentRequestShippingContactUpdate(paymentSummaryItems: summaryItems)
+
+        // Optionally handle shipping methods if provided
+        if let shippingMethodsRaw = call.getValue("shippingMethods") {
+            let shippingMethods = parseShippingMethods(from: shippingMethodsRaw)
+            if !shippingMethods.isEmpty {
+                update.shippingMethods = shippingMethods
+            }
+        }
+
+        // Call the handler to update Apple Pay sheet
+        handler(update)
+
+        // Clear the handler
+        shippingContactUpdateHandler = nil
+
+        call.resolve()
     }
 
     // MARK: - Helpers
@@ -293,6 +350,54 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
             return .storePickup
         default:
             return nil
+        }
+    }
+
+    private func parseShippingMethods(from value: Any?) -> [PKShippingMethod] {
+        guard let methods = value as? [Any] else {
+            return []
+        }
+
+        return methods.compactMap { rawMethod in
+            guard let method = rawMethod as? [String: Any],
+                  let identifier = method["identifier"] as? String,
+                  let label = method["label"] as? String,
+                  let amountString = method["amount"] as? String else {
+                return nil
+            }
+
+            let amount = NSDecimalNumber(string: amountString)
+            if amount == NSDecimalNumber.notANumber {
+                return nil
+            }
+
+            let shippingMethod = PKShippingMethod(label: label, amount: amount)
+            shippingMethod.identifier = identifier
+
+            if let detail = method["detail"] as? String {
+                shippingMethod.detail = detail
+            }
+
+            if let type = method["type"] as? String {
+                shippingMethod.type = parseShippingMethodType(from: type)
+            }
+
+            return shippingMethod
+        }
+    }
+
+    private func parseShippingMethodType(from value: String) -> PKShippingMethodType {
+        switch value.lowercased() {
+        case "pickup":
+            return .pickup
+        case "storePickup":
+            return .storePickup
+        case "delivery":
+            return .delivery
+        case "servicePickup":
+            return .servicePickup
+        default:
+            return .shipping
         }
     }
 

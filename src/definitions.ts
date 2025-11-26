@@ -123,6 +123,43 @@ export interface ApplePayContact {
   };
 }
 
+export type ApplePayShippingMethodType = 'shipping' | 'delivery' | 'servicePickup' | 'storePickup' | 'pickup';
+
+export interface ApplePayShippingMethod {
+  /**
+   * Unique identifier for the shipping method.
+   */
+  identifier: string;
+  /**
+   * Display label shown in the Apple Pay sheet.
+   */
+  label: string;
+  /**
+   * Cost of the shipping method as a string (e.g., "5.99").
+   */
+  amount: string;
+  /**
+   * Optional detail text describing the shipping method (e.g., "Arrives in 2-3 days").
+   */
+  detail?: string;
+  /**
+   * Type of shipping method.
+   */
+  type?: ApplePayShippingMethodType;
+}
+
+export interface ApplePayShippingCostsUpdate {
+  /**
+   * Updated payment summary items to display in the Apple Pay sheet.
+   * Must include line items and a final total item.
+   */
+  paymentSummaryItems: ApplePaySummaryItem[];
+  /**
+   * Optional array of shipping methods to display for the selected address.
+   */
+  shippingMethods?: ApplePayShippingMethod[];
+}
+
 export interface ApplePayPaymentResult {
   /**
    * Raw payment token encoded as base64 string.
@@ -221,10 +258,48 @@ export interface PayPlugin {
   requestPayment(options: PayPaymentOptions): Promise<PayPaymentResult>;
 
   /**
+   * Updates shipping costs and payment summary during Apple Pay checkout.
+   * Call this method in response to the 'applePayShippingContactSelected' event
+   * to dynamically update the Apple Pay sheet with new shipping costs based on
+   * the user's selected shipping address.
+   *
+   * @param options Updated payment summary items and optional shipping methods
+   * @returns Promise that resolves when the Apple Pay sheet has been updated
+   * @throws An error if no shipping contact selection is in progress
+   * @since 7.2.0
+   */
+  updateShippingCosts(options: ApplePayShippingCostsUpdate): Promise<void>;
+
+  /**
    * Get the native Capacitor plugin version
    *
    * @returns {Promise<{ id: string }>} an Promise with version for this device
    * @throws An error if the something went wrong
    */
   getPluginVersion(): Promise<{ version: string }>;
+
+  /**
+   * Add a listener for Apple Pay shipping contact selection events.
+   * This event fires when the user selects or changes their shipping address
+   * during the Apple Pay flow. Use this to recalculate shipping costs and
+   * call updateShippingCosts() with the new amounts.
+   *
+   * @param eventName The event name 'applePayShippingContactSelected'
+   * @param listenerFunc Callback function that receives the selected shipping contact
+   * @returns Promise that resolves with a listener handle for removal
+   * @since 7.2.0
+   */
+  addListener(
+    eventName: 'applePayShippingContactSelected',
+    listenerFunc: (contact: ApplePayContact) => void,
+  ): Promise<PluginListenerHandle>;
+
+  /**
+   * Remove all native listeners for this plugin
+   */
+  removeAllListeners(): Promise<void>;
+}
+
+export interface PluginListenerHandle {
+  remove: () => Promise<void>;
 }

@@ -125,7 +125,10 @@ if (availability.platform === 'ios') {
 
 * [`isPayAvailable(...)`](#ispayavailable)
 * [`requestPayment(...)`](#requestpayment)
+* [`updateShippingCosts(...)`](#updateshippingcosts)
 * [`getPluginVersion()`](#getpluginversion)
+* [`addListener('applePayShippingContactSelected', ...)`](#addlistenerapplepayshippingcontactselected-)
+* [`removeAllListeners()`](#removealllisteners)
 * [Interfaces](#interfaces)
 * [Type Aliases](#type-aliases)
 
@@ -170,6 +173,26 @@ Provide the Apple Pay configuration on iOS and the Google Pay configuration on A
 --------------------
 
 
+### updateShippingCosts(...)
+
+```typescript
+updateShippingCosts(options: ApplePayShippingCostsUpdate) => Promise<void>
+```
+
+Updates shipping costs and payment summary during Apple Pay checkout.
+Call this method in response to the 'applePayShippingContactSelected' event
+to dynamically update the Apple Pay sheet with new shipping costs based on
+the user's selected shipping address.
+
+| Param         | Type                                                                                | Description                                                 |
+| ------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| **`options`** | <code><a href="#applepayshippingcostsupdate">ApplePayShippingCostsUpdate</a></code> | Updated payment summary items and optional shipping methods |
+
+**Since:** 7.2.0
+
+--------------------
+
+
 ### getPluginVersion()
 
 ```typescript
@@ -179,6 +202,40 @@ getPluginVersion() => Promise<{ version: string; }>
 Get the native Capacitor plugin version
 
 **Returns:** <code>Promise&lt;{ version: string; }&gt;</code>
+
+--------------------
+
+
+### addListener('applePayShippingContactSelected', ...)
+
+```typescript
+addListener(eventName: 'applePayShippingContactSelected', listenerFunc: (contact: ApplePayContact) => void) => Promise<PluginListenerHandle>
+```
+
+Add a listener for Apple Pay shipping contact selection events.
+This event fires when the user selects or changes their shipping address
+during the Apple Pay flow. Use this to recalculate shipping costs and
+call updateShippingCosts() with the new amounts.
+
+| Param              | Type                                                                              | Description                                                   |
+| ------------------ | --------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| **`eventName`**    | <code>'applePayShippingContactSelected'</code>                                    | The event name 'applePayShippingContactSelected'              |
+| **`listenerFunc`** | <code>(contact: <a href="#applepaycontact">ApplePayContact</a>) =&gt; void</code> | Callback function that receives the selected shipping contact |
+
+**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt;</code>
+
+**Since:** 7.2.0
+
+--------------------
+
+
+### removeAllListeners()
+
+```typescript
+removeAllListeners() => Promise<void>
+```
+
+Remove all native listeners for this plugin
 
 --------------------
 
@@ -314,6 +371,32 @@ Get the native Capacitor plugin version
 | **`paymentDataRequest`** | <code><a href="#record">Record</a>&lt;string, unknown&gt;</code>      | Raw `PaymentDataRequest` JSON as defined by the Google Pay API. Provide transaction details, merchant info, and tokenization parameters. |
 
 
+#### ApplePayShippingCostsUpdate
+
+| Prop                      | Type                                  | Description                                                                                                      |
+| ------------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **`paymentSummaryItems`** | <code>ApplePaySummaryItem[]</code>    | Updated payment summary items to display in the Apple Pay sheet. Must include line items and a final total item. |
+| **`shippingMethods`**     | <code>ApplePayShippingMethod[]</code> | Optional array of shipping methods to display for the selected address.                                          |
+
+
+#### ApplePayShippingMethod
+
+| Prop             | Type                                                                              | Description                                                                        |
+| ---------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| **`identifier`** | <code>string</code>                                                               | Unique identifier for the shipping method.                                         |
+| **`label`**      | <code>string</code>                                                               | Display label shown in the Apple Pay sheet.                                        |
+| **`amount`**     | <code>string</code>                                                               | Cost of the shipping method as a string (e.g., "5.99").                            |
+| **`detail`**     | <code>string</code>                                                               | Optional detail text describing the shipping method (e.g., "Arrives in 2-3 days"). |
+| **`type`**       | <code><a href="#applepayshippingmethodtype">ApplePayShippingMethodType</a></code> | Type of shipping method.                                                           |
+
+
+#### PluginListenerHandle
+
+| Prop         | Type                                      |
+| ------------ | ----------------------------------------- |
+| **`remove`** | <code>() =&gt; Promise&lt;void&gt;</code> |
+
+
 ### Type Aliases
 
 
@@ -364,5 +447,10 @@ Construct a type with a set of properties K of type T
 #### ApplePayShippingType
 
 <code>'shipping' | 'delivery' | 'servicePickup' | 'storePickup'</code>
+
+
+#### ApplePayShippingMethodType
+
+<code>'shipping' | 'delivery' | 'servicePickup' | 'storePickup' | 'pickup'</code>
 
 </docgen-api>
