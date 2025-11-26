@@ -358,7 +358,7 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
             return []
         }
 
-        return methods.compactMap { rawMethod in
+        return methods.compactMap { rawMethod -> PKShippingMethod? in
             guard let method = rawMethod as? [String: Any],
                   let identifier = method["identifier"] as? String,
                   let label = method["label"] as? String,
