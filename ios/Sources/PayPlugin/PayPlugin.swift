@@ -391,7 +391,7 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
     }
 
     @available(iOS 15.0, *)
-    private func parseShippingMethodType(from value: String) -> PKShippingMethodType {
+    private func parseShippingMethodType(from value: String) -> PKShippingMethodType? {
         switch value.lowercased() {
         case "pickup":
             return .pickup
@@ -401,8 +401,10 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
             return .delivery
         case "servicePickup":
             return .servicePickup
-        default:
+        case "shipping":
             return .shipping
+        default:
+            return nil
         }
     }
 
