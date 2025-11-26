@@ -1,0 +1,988 @@
+{
+  "api": {
+    "name": "PayPlugin",
+    "slug": "payplugin",
+    "docs": "",
+    "tags": [],
+    "methods": [
+      {
+        "name": "isPayAvailable",
+        "signature": "(options?: PayAvailabilityOptions | undefined) => Promise<PayAvailabilityResult>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "PayAvailabilityOptions | undefined"
+          }
+        ],
+        "returns": "Promise<PayAvailabilityResult>",
+        "tags": [],
+        "docs": "Checks whether native pay is available on the current platform.\nOn iOS this evaluates Apple Pay, on Android it evaluates Google Pay.",
+        "complexTypes": [
+          "PayAvailabilityResult",
+          "PayAvailabilityOptions"
+        ],
+        "slug": "ispayavailable"
+      },
+      {
+        "name": "requestPayment",
+        "signature": "(options: PayPaymentOptions) => Promise<PayPaymentResult>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "PayPaymentOptions"
+          }
+        ],
+        "returns": "Promise<PayPaymentResult>",
+        "tags": [],
+        "docs": "Presents the native pay sheet for the current platform.\nProvide the Apple Pay configuration on iOS and the Google Pay configuration on Android.",
+        "complexTypes": [
+          "PayPaymentResult",
+          "PayPaymentOptions"
+        ],
+        "slug": "requestpayment"
+      },
+      {
+        "name": "updateShippingCosts",
+        "signature": "(options: ApplePayShippingCostsUpdate) => Promise<void>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "Updated payment summary items and optional shipping methods",
+            "type": "ApplePayShippingCostsUpdate"
+          }
+        ],
+        "returns": "Promise<void>",
+        "tags": [
+          {
+            "name": "param",
+            "text": "options Updated payment summary items and optional shipping methods"
+          },
+          {
+            "name": "returns",
+            "text": "Promise that resolves when the Apple Pay sheet has been updated"
+          },
+          {
+            "name": "throws",
+            "text": "An error if no shipping contact selection is in progress"
+          },
+          {
+            "name": "since",
+            "text": "7.2.0"
+          }
+        ],
+        "docs": "Updates shipping costs and payment summary during Apple Pay checkout.\nCall this method in response to the 'applePayShippingContactSelected' event\nto dynamically update the Apple Pay sheet with new shipping costs based on\nthe user's selected shipping address.",
+        "complexTypes": [
+          "ApplePayShippingCostsUpdate"
+        ],
+        "slug": "updateshippingcosts"
+      },
+      {
+        "name": "getPluginVersion",
+        "signature": "() => Promise<{ version: string; }>",
+        "parameters": [],
+        "returns": "Promise<{ version: string; }>",
+        "tags": [
+          {
+            "name": "returns",
+            "text": "an Promise with version for this device"
+          },
+          {
+            "name": "throws",
+            "text": "An error if the something went wrong"
+          }
+        ],
+        "docs": "Get the native Capacitor plugin version",
+        "complexTypes": [],
+        "slug": "getpluginversion"
+      },
+      {
+        "name": "addListener",
+        "signature": "(eventName: 'applePayShippingContactSelected', listenerFunc: (contact: ApplePayContact) => void) => Promise<PluginListenerHandle>",
+        "parameters": [
+          {
+            "name": "eventName",
+            "docs": "The event name 'applePayShippingContactSelected'",
+            "type": "'applePayShippingContactSelected'"
+          },
+          {
+            "name": "listenerFunc",
+            "docs": "Callback function that receives the selected shipping contact",
+            "type": "(contact: ApplePayContact) => void"
+          }
+        ],
+        "returns": "Promise<PluginListenerHandle>",
+        "tags": [
+          {
+            "name": "param",
+            "text": "eventName The event name 'applePayShippingContactSelected'"
+          },
+          {
+            "name": "param",
+            "text": "listenerFunc Callback function that receives the selected shipping contact"
+          },
+          {
+            "name": "returns",
+            "text": "Promise that resolves with a listener handle for removal"
+          },
+          {
+            "name": "since",
+            "text": "7.2.0"
+          }
+        ],
+        "docs": "Add a listener for Apple Pay shipping contact selection events.\nThis event fires when the user selects or changes their shipping address\nduring the Apple Pay flow. Use this to recalculate shipping costs and\ncall updateShippingCosts() with the new amounts.",
+        "complexTypes": [
+          "PluginListenerHandle",
+          "ApplePayContact"
+        ],
+        "slug": "addlistenerapplepayshippingcontactselected-"
+      },
+      {
+        "name": "removeAllListeners",
+        "signature": "() => Promise<void>",
+        "parameters": [],
+        "returns": "Promise<void>",
+        "tags": [],
+        "docs": "Remove all native listeners for this plugin",
+        "complexTypes": [],
+        "slug": "removealllisteners"
+      }
+    ],
+    "properties": []
+  },
+  "interfaces": [
+    {
+      "name": "PayAvailabilityResult",
+      "slug": "payavailabilityresult",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "available",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "boolean"
+        },
+        {
+          "name": "platform",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [
+            "PayPlatform"
+          ],
+          "type": "PayPlatform"
+        },
+        {
+          "name": "apple",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [
+            "ApplePayAvailabilityResult"
+          ],
+          "type": "ApplePayAvailabilityResult"
+        },
+        {
+          "name": "google",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [
+            "GooglePayAvailabilityResult"
+          ],
+          "type": "GooglePayAvailabilityResult"
+        }
+      ]
+    },
+    {
+      "name": "ApplePayAvailabilityResult",
+      "slug": "applepayavailabilityresult",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "canMakePayments",
+          "tags": [],
+          "docs": "Indicates whether the device can make Apple Pay payments in general.",
+          "complexTypes": [],
+          "type": "boolean"
+        },
+        {
+          "name": "canMakePaymentsUsingNetworks",
+          "tags": [],
+          "docs": "Indicates whether the device can make Apple Pay payments with the supplied networks.",
+          "complexTypes": [],
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "name": "GooglePayAvailabilityResult",
+      "slug": "googlepayavailabilityresult",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "isReady",
+          "tags": [],
+          "docs": "Indicates whether the Google Pay API is available for the supplied parameters.",
+          "complexTypes": [],
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "name": "PayAvailabilityOptions",
+      "slug": "payavailabilityoptions",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "apple",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [
+            "ApplePayAvailabilityOptions"
+          ],
+          "type": "ApplePayAvailabilityOptions"
+        },
+        {
+          "name": "google",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [
+            "GooglePayAvailabilityOptions"
+          ],
+          "type": "GooglePayAvailabilityOptions"
+        }
+      ]
+    },
+    {
+      "name": "ApplePayAvailabilityOptions",
+      "slug": "applepayavailabilityoptions",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "supportedNetworks",
+          "tags": [],
+          "docs": "Optional list of payment networks you intend to use.\nPassing networks determines the return value of `canMakePaymentsUsingNetworks`.",
+          "complexTypes": [
+            "ApplePayNetwork"
+          ],
+          "type": "ApplePayNetwork[] | undefined"
+        }
+      ]
+    },
+    {
+      "name": "GooglePayAvailabilityOptions",
+      "slug": "googlepayavailabilityoptions",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "environment",
+          "tags": [],
+          "docs": "Environment used to construct the Google Payments client. Defaults to `'test'`.",
+          "complexTypes": [
+            "GooglePayEnvironment"
+          ],
+          "type": "GooglePayEnvironment"
+        },
+        {
+          "name": "isReadyToPayRequest",
+          "tags": [],
+          "docs": "Raw `IsReadyToPayRequest` JSON as defined by the Google Pay API.\nSupply the card networks and auth methods you intend to support at runtime.",
+          "complexTypes": [
+            "Record"
+          ],
+          "type": "Record<string, unknown>"
+        }
+      ]
+    },
+    {
+      "name": "PayPaymentResult",
+      "slug": "paypaymentresult",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "platform",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [
+            "Exclude",
+            "PayPlatform"
+          ],
+          "type": "Exclude<PayPlatform, 'web'>"
+        },
+        {
+          "name": "apple",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [
+            "ApplePayPaymentResult"
+          ],
+          "type": "ApplePayPaymentResult"
+        },
+        {
+          "name": "google",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [
+            "GooglePayPaymentResult"
+          ],
+          "type": "GooglePayPaymentResult"
+        }
+      ]
+    },
+    {
+      "name": "ApplePayPaymentResult",
+      "slug": "applepaypaymentresult",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "paymentData",
+          "tags": [],
+          "docs": "Raw payment token encoded as base64 string.",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "paymentString",
+          "tags": [],
+          "docs": "Raw payment token JSON string, useful for debugging.",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "transactionIdentifier",
+          "tags": [],
+          "docs": "Payment transaction identifier.",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "paymentMethod",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [
+            "ApplePayNetwork"
+          ],
+          "type": "{ displayName?: string | undefined; network?: ApplePayNetwork | undefined; type: 'credit' | 'debit' | 'prepaid' | 'store'; }"
+        },
+        {
+          "name": "shippingContact",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [
+            "ApplePayContact"
+          ],
+          "type": "ApplePayContact"
+        },
+        {
+          "name": "billingContact",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [
+            "ApplePayContact"
+          ],
+          "type": "ApplePayContact"
+        }
+      ]
+    },
+    {
+      "name": "ApplePayContact",
+      "slug": "applepaycontact",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "name",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "{ givenName?: string | undefined; familyName?: string | undefined; middleName?: string | undefined; namePrefix?: string | undefined; nameSuffix?: string | undefined; nickname?: string | undefined; } | undefined"
+        },
+        {
+          "name": "emailAddress",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "phoneNumber",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "postalAddress",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "{ street?: string | undefined; city?: string | undefined; state?: string | undefined; postalCode?: string | undefined; country?: string | undefined; isoCountryCode?: string | undefined; subAdministrativeArea?: string | undefined; subLocality?: string | undefined; } | undefined"
+        }
+      ]
+    },
+    {
+      "name": "GooglePayPaymentResult",
+      "slug": "googlepaypaymentresult",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "paymentData",
+          "tags": [],
+          "docs": "Payment data returned by Google Pay.",
+          "complexTypes": [
+            "Record"
+          ],
+          "type": "Record<string, unknown>"
+        }
+      ]
+    },
+    {
+      "name": "PayPaymentOptions",
+      "slug": "paypaymentoptions",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "apple",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [
+            "ApplePayPaymentOptions"
+          ],
+          "type": "ApplePayPaymentOptions"
+        },
+        {
+          "name": "google",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [
+            "GooglePayPaymentOptions"
+          ],
+          "type": "GooglePayPaymentOptions"
+        }
+      ]
+    },
+    {
+      "name": "ApplePayPaymentOptions",
+      "slug": "applepaypaymentoptions",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "merchantIdentifier",
+          "tags": [],
+          "docs": "Merchant identifier created in the Apple Developer portal.",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "countryCode",
+          "tags": [],
+          "docs": "Two-letter ISO 3166 country code.",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "currencyCode",
+          "tags": [],
+          "docs": "Three-letter ISO 4217 currency code.",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "paymentSummaryItems",
+          "tags": [],
+          "docs": "Payment summary items displayed in the Apple Pay sheet.",
+          "complexTypes": [
+            "ApplePaySummaryItem"
+          ],
+          "type": "ApplePaySummaryItem[]"
+        },
+        {
+          "name": "supportedNetworks",
+          "tags": [],
+          "docs": "Card networks to support.",
+          "complexTypes": [
+            "ApplePayNetwork"
+          ],
+          "type": "ApplePayNetwork[]"
+        },
+        {
+          "name": "merchantCapabilities",
+          "tags": [],
+          "docs": "Merchant payment capabilities. Defaults to ['3DS'] when omitted.",
+          "complexTypes": [
+            "ApplePayMerchantCapability"
+          ],
+          "type": "ApplePayMerchantCapability[] | undefined"
+        },
+        {
+          "name": "requiredShippingContactFields",
+          "tags": [],
+          "docs": "Contact fields that must be supplied for shipping.",
+          "complexTypes": [
+            "ApplePayContactField"
+          ],
+          "type": "ApplePayContactField[] | undefined"
+        },
+        {
+          "name": "requiredBillingContactFields",
+          "tags": [],
+          "docs": "Contact fields that must be supplied for billing.",
+          "complexTypes": [
+            "ApplePayContactField"
+          ],
+          "type": "ApplePayContactField[] | undefined"
+        },
+        {
+          "name": "shippingType",
+          "tags": [],
+          "docs": "Controls the shipping flow presented to the user.",
+          "complexTypes": [
+            "ApplePayShippingType"
+          ],
+          "type": "ApplePayShippingType"
+        },
+        {
+          "name": "supportedCountries",
+          "tags": [],
+          "docs": "Optional ISO 3166 country codes where the merchant is supported.",
+          "complexTypes": [],
+          "type": "string[] | undefined"
+        },
+        {
+          "name": "applicationData",
+          "tags": [],
+          "docs": "Optional opaque application data passed back in the payment token.",
+          "complexTypes": [],
+          "type": "string | undefined"
+        }
+      ]
+    },
+    {
+      "name": "ApplePaySummaryItem",
+      "slug": "applepaysummaryitem",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "label",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "amount",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "type",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [
+            "ApplePaySummaryItemType"
+          ],
+          "type": "ApplePaySummaryItemType"
+        }
+      ]
+    },
+    {
+      "name": "GooglePayPaymentOptions",
+      "slug": "googlepaypaymentoptions",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "environment",
+          "tags": [],
+          "docs": "Environment used to construct the Google Payments client. Defaults to `'test'`.",
+          "complexTypes": [
+            "GooglePayEnvironment"
+          ],
+          "type": "GooglePayEnvironment"
+        },
+        {
+          "name": "paymentDataRequest",
+          "tags": [],
+          "docs": "Raw `PaymentDataRequest` JSON as defined by the Google Pay API.\nProvide transaction details, merchant info, and tokenization parameters.",
+          "complexTypes": [
+            "Record"
+          ],
+          "type": "Record<string, unknown>"
+        }
+      ]
+    },
+    {
+      "name": "ApplePayShippingCostsUpdate",
+      "slug": "applepayshippingcostsupdate",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "paymentSummaryItems",
+          "tags": [],
+          "docs": "Updated payment summary items to display in the Apple Pay sheet.\nMust include line items and a final total item.",
+          "complexTypes": [
+            "ApplePaySummaryItem"
+          ],
+          "type": "ApplePaySummaryItem[]"
+        },
+        {
+          "name": "shippingMethods",
+          "tags": [],
+          "docs": "Optional array of shipping methods to display for the selected address.",
+          "complexTypes": [
+            "ApplePayShippingMethod"
+          ],
+          "type": "ApplePayShippingMethod[] | undefined"
+        }
+      ]
+    },
+    {
+      "name": "ApplePayShippingMethod",
+      "slug": "applepayshippingmethod",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "identifier",
+          "tags": [],
+          "docs": "Unique identifier for the shipping method.",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "tags": [],
+          "docs": "Display label shown in the Apple Pay sheet.",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "amount",
+          "tags": [],
+          "docs": "Cost of the shipping method as a string (e.g., \"5.99\").",
+          "complexTypes": [],
+          "type": "string"
+        },
+        {
+          "name": "detail",
+          "tags": [],
+          "docs": "Optional detail text describing the shipping method (e.g., \"Arrives in 2-3 days\").",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "type",
+          "tags": [],
+          "docs": "Type of shipping method.",
+          "complexTypes": [
+            "ApplePayShippingMethodType"
+          ],
+          "type": "ApplePayShippingMethodType"
+        }
+      ]
+    },
+    {
+      "name": "PluginListenerHandle",
+      "slug": "pluginlistenerhandle",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "remove",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "() => Promise<void>"
+        }
+      ]
+    }
+  ],
+  "enums": [],
+  "typeAliases": [
+    {
+      "name": "PayPlatform",
+      "slug": "payplatform",
+      "docs": "",
+      "types": [
+        {
+          "text": "'ios'",
+          "complexTypes": []
+        },
+        {
+          "text": "'android'",
+          "complexTypes": []
+        },
+        {
+          "text": "'web'",
+          "complexTypes": []
+        }
+      ]
+    },
+    {
+      "name": "ApplePayNetwork",
+      "slug": "applepaynetwork",
+      "docs": "",
+      "types": [
+        {
+          "text": "'amex'",
+          "complexTypes": []
+        },
+        {
+          "text": "'chinaUnionPay'",
+          "complexTypes": []
+        },
+        {
+          "text": "'discover'",
+          "complexTypes": []
+        },
+        {
+          "text": "'eftpos'",
+          "complexTypes": []
+        },
+        {
+          "text": "'electron'",
+          "complexTypes": []
+        },
+        {
+          "text": "'girocard'",
+          "complexTypes": []
+        },
+        {
+          "text": "'interac'",
+          "complexTypes": []
+        },
+        {
+          "text": "'jcb'",
+          "complexTypes": []
+        },
+        {
+          "text": "'mada'",
+          "complexTypes": []
+        },
+        {
+          "text": "'maestro'",
+          "complexTypes": []
+        },
+        {
+          "text": "'masterCard'",
+          "complexTypes": []
+        },
+        {
+          "text": "'privateLabel'",
+          "complexTypes": []
+        },
+        {
+          "text": "'quicPay'",
+          "complexTypes": []
+        },
+        {
+          "text": "'suica'",
+          "complexTypes": []
+        },
+        {
+          "text": "'visa'",
+          "complexTypes": []
+        },
+        {
+          "text": "'vPay'",
+          "complexTypes": []
+        },
+        {
+          "text": "'id'",
+          "complexTypes": []
+        },
+        {
+          "text": "'cartesBancaires'",
+          "complexTypes": []
+        }
+      ]
+    },
+    {
+      "name": "GooglePayEnvironment",
+      "slug": "googlepayenvironment",
+      "docs": "",
+      "types": [
+        {
+          "text": "'test'",
+          "complexTypes": []
+        },
+        {
+          "text": "'production'",
+          "complexTypes": []
+        }
+      ]
+    },
+    {
+      "name": "Record",
+      "slug": "record",
+      "docs": "Construct a type with a set of properties K of type T",
+      "types": [
+        {
+          "text": "{\r\n    [P in K]: T;\r\n}",
+          "complexTypes": [
+            "K",
+            "T"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Exclude",
+      "slug": "exclude",
+      "docs": "Exclude from T those types that are assignable to U",
+      "types": [
+        {
+          "text": "T extends U ? never : T",
+          "complexTypes": [
+            "T",
+            "U"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ApplePaySummaryItemType",
+      "slug": "applepaysummaryitemtype",
+      "docs": "",
+      "types": [
+        {
+          "text": "'final'",
+          "complexTypes": []
+        },
+        {
+          "text": "'pending'",
+          "complexTypes": []
+        }
+      ]
+    },
+    {
+      "name": "ApplePayMerchantCapability",
+      "slug": "applepaymerchantcapability",
+      "docs": "",
+      "types": [
+        {
+          "text": "'3DS'",
+          "complexTypes": []
+        },
+        {
+          "text": "'credit'",
+          "complexTypes": []
+        },
+        {
+          "text": "'debit'",
+          "complexTypes": []
+        },
+        {
+          "text": "'emv'",
+          "complexTypes": []
+        }
+      ]
+    },
+    {
+      "name": "ApplePayContactField",
+      "slug": "applepaycontactfield",
+      "docs": "",
+      "types": [
+        {
+          "text": "'emailAddress'",
+          "complexTypes": []
+        },
+        {
+          "text": "'name'",
+          "complexTypes": []
+        },
+        {
+          "text": "'phoneNumber'",
+          "complexTypes": []
+        },
+        {
+          "text": "'postalAddress'",
+          "complexTypes": []
+        }
+      ]
+    },
+    {
+      "name": "ApplePayShippingType",
+      "slug": "applepayshippingtype",
+      "docs": "",
+      "types": [
+        {
+          "text": "'shipping'",
+          "complexTypes": []
+        },
+        {
+          "text": "'delivery'",
+          "complexTypes": []
+        },
+        {
+          "text": "'servicePickup'",
+          "complexTypes": []
+        },
+        {
+          "text": "'storePickup'",
+          "complexTypes": []
+        }
+      ]
+    },
+    {
+      "name": "ApplePayShippingMethodType",
+      "slug": "applepayshippingmethodtype",
+      "docs": "",
+      "types": [
+        {
+          "text": "'shipping'",
+          "complexTypes": []
+        },
+        {
+          "text": "'delivery'",
+          "complexTypes": []
+        },
+        {
+          "text": "'servicePickup'",
+          "complexTypes": []
+        },
+        {
+          "text": "'storePickup'",
+          "complexTypes": []
+        },
+        {
+          "text": "'pickup'",
+          "complexTypes": []
+        }
+      ]
+    }
+  ],
+  "pluginConfigs": []
+}
