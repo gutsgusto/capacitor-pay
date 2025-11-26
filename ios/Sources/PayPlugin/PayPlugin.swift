@@ -378,33 +378,10 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
                 shippingMethod.detail = detail
             }
 
-            // PKShippingMethodType is only available in iOS 15.0+
-            if #available(iOS 15.0, *) {
-                if let type = method["type"] as? String,
-                   let methodType = parseShippingMethodType(from: type) {
-                    shippingMethod.type = methodType
-                }
-            }
+            // Note: PKShippingMethod type property is not configurable via the API
+            // The system automatically determines the shipping method type
 
             return shippingMethod
-        }
-    }
-
-    @available(iOS 15.0, *)
-    private func parseShippingMethodType(from value: String) -> PKShippingMethod.PKShippingMethodType? {
-        switch value.lowercased() {
-        case "pickup":
-            return .pickup
-        case "storePickup":
-            return .storePickup
-        case "delivery":
-            return .delivery
-        case "servicePickup":
-            return .servicePickup
-        case "shipping":
-            return .shipping
-        default:
-            return nil
         }
     }
 
