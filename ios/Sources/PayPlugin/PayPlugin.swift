@@ -5,7 +5,7 @@ import PassKit
 
 @objc(PayPlugin)
 public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationControllerDelegate {
-    private let pluginVersion: String = "7.2.0"
+    private let pluginVersion: String = "7.2.1"
     public let identifier = "PayPlugin"
     public let jsName = "Pay"
     public let pluginMethods: [CAPPluginMethod] = [
@@ -378,14 +378,19 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
                 shippingMethod.detail = detail
             }
 
-            if let type = method["type"] as? String {
-                shippingMethod.type = parseShippingMethodType(from: type)
+            // PKShippingMethodType is only available in iOS 15.0+
+            if #available(iOS 15.0, *) {
+                if let type = method["type"] as? String,
+                   let methodType = parseShippingMethodType(from: type) {
+                    shippingMethod.type = methodType
+                }
             }
 
             return shippingMethod
         }
     }
 
+    @available(iOS 15.0, *)
     private func parseShippingMethodType(from value: String) -> PKShippingMethodType {
         switch value.lowercased() {
         case "pickup":
