@@ -126,9 +126,11 @@ if (availability.platform === 'ios') {
 * [`isPayAvailable(...)`](#ispayavailable)
 * [`requestPayment(...)`](#requestpayment)
 * [`updateShippingCosts(...)`](#updateshippingcosts)
+* [`completeMerchantValidation(...)`](#completemerchantvalidation)
 * [`getPluginVersion()`](#getpluginversion)
 * [`addListener('applePayShippingContactSelected', ...)`](#addlistenerapplepayshippingcontactselected-)
 * [`addListener('applePayShippingMethodSelected', ...)`](#addlistenerapplepayshippingmethodselected-)
+* [`addListener('applePayMerchantValidation', ...)`](#addlistenerapplepaymerchantvalidation-)
 * [`removeAllListeners()`](#removealllisteners)
 * [Interfaces](#interfaces)
 * [Type Aliases](#type-aliases)
@@ -194,6 +196,25 @@ the user's selected shipping address.
 --------------------
 
 
+### completeMerchantValidation(...)
+
+```typescript
+completeMerchantValidation(options: { merchantSession: string; }) => Promise<void>
+```
+
+Completes the Apple Pay merchant validation process.
+Call this method in response to the 'applePayMerchantValidation' event
+after you've obtained a merchant session from your server.
+
+| Param         | Type                                      | Description                                        |
+| ------------- | ----------------------------------------- | -------------------------------------------------- |
+| **`options`** | <code>{ merchantSession: string; }</code> | Object containing the merchant session JSON string |
+
+**Since:** 7.2.1
+
+--------------------
+
+
 ### getPluginVersion()
 
 ```typescript
@@ -249,6 +270,28 @@ on the selected shipping method and call updateShippingCosts() with the new amou
 **Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt;</code>
 
 **Since:** 7.2.0
+
+--------------------
+
+
+### addListener('applePayMerchantValidation', ...)
+
+```typescript
+addListener(eventName: 'applePayMerchantValidation', listenerFunc: () => void) => Promise<PluginListenerHandle>
+```
+
+Add a listener for Apple Pay merchant validation events.
+This event fires when Apple Pay needs to validate your merchant.
+You must call completeMerchantValidation() with a merchant session from your server.
+
+| Param              | Type                                      | Description                                     |
+| ------------------ | ----------------------------------------- | ----------------------------------------------- |
+| **`eventName`**    | <code>'applePayMerchantValidation'</code> | The event name 'applePayMerchantValidation'     |
+| **`listenerFunc`** | <code>() =&gt; void</code>                | Callback function to handle merchant validation |
+
+**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt;</code>
+
+**Since:** 7.2.1
 
 --------------------
 

@@ -26,6 +26,9 @@ class PayWeb extends core.WebPlugin {
     async updateShippingCosts(_options) {
         throw this.unimplemented('updateShippingCosts is only available on iOS. Use a native iOS platform.');
     }
+    async completeMerchantValidation(_options) {
+        throw this.unimplemented('completeMerchantValidation is only available on iOS. Use a native iOS platform.');
+    }
     async getPluginVersion() {
         return { version: 'web' };
     }

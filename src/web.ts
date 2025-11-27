@@ -32,6 +32,10 @@ export class PayWeb extends WebPlugin implements PayPlugin {
     throw this.unimplemented('updateShippingCosts is only available on iOS. Use a native iOS platform.');
   }
 
+  async completeMerchantValidation(_options: { merchantSession: string }): Promise<void> {
+    throw this.unimplemented('completeMerchantValidation is only available on iOS. Use a native iOS platform.');
+  }
+
   async getPluginVersion(): Promise<{ version: string }> {
     return { version: 'web' };
   }

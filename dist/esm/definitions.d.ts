@@ -227,6 +227,19 @@ export interface PayPlugin {
      */
     updateShippingCosts(options: ApplePayShippingCostsUpdate): Promise<void>;
     /**
+     * Completes the Apple Pay merchant validation process.
+     * Call this method in response to the 'applePayMerchantValidation' event
+     * after you've obtained a merchant session from your server.
+     *
+     * @param options Object containing the merchant session JSON string
+     * @returns Promise that resolves when validation is complete
+     * @throws An error if no merchant validation is in progress
+     * @since 7.2.1
+     */
+    completeMerchantValidation(options: {
+        merchantSession: string;
+    }): Promise<void>;
+    /**
      * Get the native Capacitor plugin version
      *
      * @returns {Promise<{ id: string }>} an Promise with version for this device
@@ -259,6 +272,17 @@ export interface PayPlugin {
      * @since 7.2.0
      */
     addListener(eventName: 'applePayShippingMethodSelected', listenerFunc: (shippingMethod: ApplePayShippingMethod) => void): Promise<PluginListenerHandle>;
+    /**
+     * Add a listener for Apple Pay merchant validation events.
+     * This event fires when Apple Pay needs to validate your merchant.
+     * You must call completeMerchantValidation() with a merchant session from your server.
+     *
+     * @param eventName The event name 'applePayMerchantValidation'
+     * @param listenerFunc Callback function to handle merchant validation
+     * @returns Promise that resolves with a listener handle for removal
+     * @since 7.2.1
+     */
+    addListener(eventName: 'applePayMerchantValidation', listenerFunc: () => void): Promise<PluginListenerHandle>;
     /**
      * Remove all native listeners for this plugin
      */

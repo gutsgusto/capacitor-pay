@@ -79,6 +79,39 @@
         "slug": "updateshippingcosts"
       },
       {
+        "name": "completeMerchantValidation",
+        "signature": "(options: { merchantSession: string; }) => Promise<void>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "Object containing the merchant session JSON string",
+            "type": "{ merchantSession: string; }"
+          }
+        ],
+        "returns": "Promise<void>",
+        "tags": [
+          {
+            "name": "param",
+            "text": "options Object containing the merchant session JSON string"
+          },
+          {
+            "name": "returns",
+            "text": "Promise that resolves when validation is complete"
+          },
+          {
+            "name": "throws",
+            "text": "An error if no merchant validation is in progress"
+          },
+          {
+            "name": "since",
+            "text": "7.2.1"
+          }
+        ],
+        "docs": "Completes the Apple Pay merchant validation process.\nCall this method in response to the 'applePayMerchantValidation' event\nafter you've obtained a merchant session from your server.",
+        "complexTypes": [],
+        "slug": "completemerchantvalidation"
+      },
+      {
         "name": "getPluginVersion",
         "signature": "() => Promise<{ version: string; }>",
         "parameters": [],
@@ -178,6 +211,46 @@
           "ApplePayShippingMethod"
         ],
         "slug": "addlistenerapplepayshippingmethodselected-"
+      },
+      {
+        "name": "addListener",
+        "signature": "(eventName: 'applePayMerchantValidation', listenerFunc: () => void) => Promise<PluginListenerHandle>",
+        "parameters": [
+          {
+            "name": "eventName",
+            "docs": "The event name 'applePayMerchantValidation'",
+            "type": "'applePayMerchantValidation'"
+          },
+          {
+            "name": "listenerFunc",
+            "docs": "Callback function to handle merchant validation",
+            "type": "() => void"
+          }
+        ],
+        "returns": "Promise<PluginListenerHandle>",
+        "tags": [
+          {
+            "name": "param",
+            "text": "eventName The event name 'applePayMerchantValidation'"
+          },
+          {
+            "name": "param",
+            "text": "listenerFunc Callback function to handle merchant validation"
+          },
+          {
+            "name": "returns",
+            "text": "Promise that resolves with a listener handle for removal"
+          },
+          {
+            "name": "since",
+            "text": "7.2.1"
+          }
+        ],
+        "docs": "Add a listener for Apple Pay merchant validation events.\nThis event fires when Apple Pay needs to validate your merchant.\nYou must call completeMerchantValidation() with a merchant session from your server.",
+        "complexTypes": [
+          "PluginListenerHandle"
+        ],
+        "slug": "addlistenerapplepaymerchantvalidation-"
       },
       {
         "name": "removeAllListeners",
