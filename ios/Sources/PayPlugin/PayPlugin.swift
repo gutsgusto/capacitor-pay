@@ -56,7 +56,9 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
         }
 
         do {
+            CAPLog.print("🍎 Building payment request...")
             let request = try buildPaymentRequest(from: appleOptions)
+            CAPLog.print("🍎 Merchant ID:", request.merchantIdentifier)
 
             guard PKPaymentAuthorizationController.canMakePayments() else {
                 throw PayPluginError.invalidConfiguration("Apple Pay is not available on this device.")
@@ -74,10 +76,14 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
             controller.delegate = self
             applePayController = controller
 
+            CAPLog.print("🍎 Presenting Apple Pay sheet...")
             DispatchQueue.main.async {
                 controller.present { presented in
                     if !presented {
+                        CAPLog.print("❌ Failed to present Apple Pay sheet")
                         self.rejectPendingCall("Failed to present Apple Pay sheet.")
+                    } else {
+                        CAPLog.print("✅ Apple Pay sheet presented successfully")
                     }
                 }
             }
