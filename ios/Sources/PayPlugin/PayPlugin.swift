@@ -244,24 +244,24 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
             return
         }
 
-        // Get the merchant session from JavaScript
-        guard let merchantSessionData = call.getString("merchantSession") else {
+        // Get the merchant session from JavaScript (base64 encoded opaque data)
+        guard let merchantSessionBase64 = call.getString("merchantSession") else {
             call.reject("merchantSession is required")
             return
         }
 
-        // Parse the merchant session JSON
-        guard let sessionData = merchantSessionData.data(using: .utf8),
-              let sessionDict = try? JSONSerialization.jsonObject(with: sessionData) as? [String: Any] else {
-            call.reject("Invalid merchantSession JSON")
+        // Decode the base64 merchant session data
+        guard let sessionData = Data(base64Encoded: merchantSessionBase64) else {
+            call.reject("Invalid base64 merchantSession")
             return
         }
 
-        // Create the PKPaymentMerchantSession from the dictionary
-        // This requires converting the dictionary to Data and back
-        guard let sessionDataFromDict = try? JSONSerialization.data(withJSONObject: sessionDict),
-              let merchantSession = try? PKPaymentMerchantSession(data: sessionDataFromDict) else {
-            call.reject("Failed to create PKPaymentMerchantSession")
+        // Unarchive the PKPaymentMerchantSession
+        guard let merchantSession = try? NSKeyedUnarchiver.unarchivedObject(
+            ofClass: PKPaymentMerchantSession.self,
+            from: sessionData
+        ) else {
+            call.reject("Failed to unarchive PKPaymentMerchantSession")
             return
         }
 
