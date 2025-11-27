@@ -12,7 +12,6 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
         CAPPluginMethod(name: "isPayAvailable", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "requestPayment", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "updateShippingCosts", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "completeMerchantValidation", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "getPluginVersion", returnType: CAPPluginReturnPromise)
     ]
 
@@ -21,7 +20,6 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
     private var applePayController: PKPaymentAuthorizationController?
     private var shippingContactUpdateHandler: ((PKPaymentRequestShippingContactUpdate) -> Void)?
     private var shippingMethodUpdateHandler: ((PKPaymentRequestShippingMethodUpdate) -> Void)?
-    private var merchantSessionUpdateHandler: ((PKPaymentRequestMerchantSessionUpdate) -> Void)?
 
     @objc func isPayAvailable(_ call: CAPPluginCall) {
         let appleOptions = call.getObject("apple") ?? [:]
@@ -165,22 +163,6 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
         print("📦 [PayPlugin] JS notification sent")
     }
 
-    @available(iOS 14.0, *)
-    public func paymentAuthorizationController(
-        _ controller: PKPaymentAuthorizationController,
-        didRequestMerchantSessionUpdate handler: @escaping (PKPaymentRequestMerchantSessionUpdate) -> Void
-    ) {
-        CAPLog.print("🔐 [PayPlugin] didRequestMerchantSessionUpdate called")
-
-        // Store the completion handler to be called from JavaScript
-        merchantSessionUpdateHandler = handler
-
-        // Notify JavaScript listeners - they need to perform merchant validation
-        notifyListeners("applePayMerchantValidation", data: [:])
-
-        CAPLog.print("🔐 [PayPlugin] Merchant validation event sent to JS")
-    }
-
     // MARK: - Capacitor Methods
 
     @objc func updateShippingCosts(_ call: CAPPluginCall) {
@@ -232,49 +214,6 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
             return
         }
 
-        call.resolve()
-    }
-
-    @available(iOS 14.0, *)
-    @objc func completeMerchantValidation(_ call: CAPPluginCall) {
-        CAPLog.print("🔐 [PayPlugin] completeMerchantValidation called")
-
-        guard let merchantSessionUpdateHandler = merchantSessionUpdateHandler else {
-            call.reject("No merchant validation in progress")
-            return
-        }
-
-        // Get the merchant session from JavaScript (base64 encoded opaque data)
-        guard let merchantSessionBase64 = call.getString("merchantSession") else {
-            call.reject("merchantSession is required")
-            return
-        }
-
-        // Decode the base64 merchant session data
-        guard let sessionData = Data(base64Encoded: merchantSessionBase64) else {
-            call.reject("Invalid base64 merchantSession")
-            return
-        }
-
-        // Unarchive the PKPaymentMerchantSession
-        guard let merchantSession = try? NSKeyedUnarchiver.unarchivedObject(
-            ofClass: PKPaymentMerchantSession.self,
-            from: sessionData
-        ) else {
-            call.reject("Failed to unarchive PKPaymentMerchantSession")
-            return
-        }
-
-        // Create the update with the merchant session
-        let update = PKPaymentRequestMerchantSessionUpdate(session: merchantSession)
-
-        // Call the handler
-        merchantSessionUpdateHandler(update)
-
-        // Clear the handler
-        self.merchantSessionUpdateHandler = nil
-
-        CAPLog.print("🔐 [PayPlugin] Merchant session completed")
         call.resolve()
     }
 
