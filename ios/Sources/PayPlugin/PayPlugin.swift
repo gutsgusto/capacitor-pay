@@ -12,6 +12,7 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
         CAPPluginMethod(name: "isPayAvailable", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "requestPayment", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "updateShippingCosts", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "completeMerchantValidation", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "getPluginVersion", returnType: CAPPluginReturnPromise)
     ]
 
@@ -20,6 +21,7 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
     private var applePayController: PKPaymentAuthorizationController?
     private var shippingContactUpdateHandler: ((PKPaymentRequestShippingContactUpdate) -> Void)?
     private var shippingMethodUpdateHandler: ((PKPaymentRequestShippingMethodUpdate) -> Void)?
+    private var merchantSessionUpdateHandler: ((PKPaymentRequestMerchantSessionUpdate) -> Void)?
 
     @objc func isPayAvailable(_ call: CAPPluginCall) {
         let appleOptions = call.getObject("apple") ?? [:]
@@ -163,6 +165,24 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
         print("📦 [PayPlugin] JS notification sent")
     }
 
+    @available(iOS 14.0, *)
+    public func paymentAuthorizationController(
+        _ controller: PKPaymentAuthorizationController,
+        didRequestMerchantSessionUpdate handler: @escaping (PKPaymentRequestMerchantSessionUpdate) -> Void
+    ) {
+        CAPLog.print("🔐 [PayPlugin] Merchant validation requested")
+
+        // Build data to send to JavaScript
+        let data: [String: Any] = [:]
+
+        // Notify JavaScript - it should call Buckaroo's validation endpoint
+        // and then call completeMerchantValidation with the response
+        notifyListeners("applePayMerchantValidation", data: data)
+
+        // Store handler to be called later from JavaScript
+        merchantSessionUpdateHandler = handler
+    }
+
     // MARK: - Capacitor Methods
 
     @objc func updateShippingCosts(_ call: CAPPluginCall) {
@@ -214,6 +234,24 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
             return
         }
 
+        call.resolve()
+    }
+
+    @available(iOS 14.0, *)
+    @objc func completeMerchantValidation(_ call: CAPPluginCall) {
+        CAPLog.print("🔐 [PayPlugin] completeMerchantValidation called")
+
+        guard let handler = merchantSessionUpdateHandler else {
+            call.reject("No merchant validation in progress")
+            return
+        }
+
+        // Since Buckaroo handles validation server-side, we just need to
+        // signal to Apple Pay that validation succeeded
+        let update = PKPaymentRequestMerchantSessionUpdate()
+        handler(update)
+
+        merchantSessionUpdateHandler = nil
         call.resolve()
     }
 
