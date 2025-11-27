@@ -21,7 +21,6 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
     private var applePayController: PKPaymentAuthorizationController?
     private var shippingContactUpdateHandler: ((PKPaymentRequestShippingContactUpdate) -> Void)?
     private var shippingMethodUpdateHandler: ((PKPaymentRequestShippingMethodUpdate) -> Void)?
-    private var merchantSessionUpdateHandler: ((PKPaymentRequestMerchantSessionUpdate) -> Void)?
 
     @objc func isPayAvailable(_ call: CAPPluginCall) {
         let appleOptions = call.getObject("apple") ?? [:]
@@ -171,23 +170,9 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
         print("📦 [PayPlugin] JS notification sent")
     }
 
-    @available(iOS 14.0, *)
-    public func paymentAuthorizationController(
-        _ controller: PKPaymentAuthorizationController,
-        didRequestMerchantSessionUpdate handler: @escaping (PKPaymentRequestMerchantSessionUpdate) -> Void
-    ) {
-        CAPLog.print("🔐 [PayPlugin] Merchant validation requested")
-
-        // Build data to send to JavaScript
-        let data: [String: Any] = [:]
-
-        // Notify JavaScript - it should call Buckaroo's validation endpoint
-        // and then call completeMerchantValidation with the response
-        notifyListeners("applePayMerchantValidation", data: data)
-
-        // Store handler to be called later from JavaScript
-        merchantSessionUpdateHandler = handler
-    }
+    // NOTE: Merchant validation delegate is NOT implemented for Buckaroo
+    // Buckaroo handles merchant validation server-side, not client-side
+    // Only web-based Apple Pay implementations need the merchant session delegate
 
     // MARK: - Capacitor Methods
 
@@ -243,22 +228,9 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
         call.resolve()
     }
 
-    @available(iOS 14.0, *)
     @objc func completeMerchantValidation(_ call: CAPPluginCall) {
-        CAPLog.print("🔐 [PayPlugin] completeMerchantValidation called")
-
-        guard let handler = merchantSessionUpdateHandler else {
-            call.reject("No merchant validation in progress")
-            return
-        }
-
-        // Since Buckaroo handles validation server-side, we just need to
-        // signal to Apple Pay that validation succeeded
-        let update = PKPaymentRequestMerchantSessionUpdate()
-        handler(update)
-
-        merchantSessionUpdateHandler = nil
-        call.resolve()
+        // Not needed for Buckaroo - they handle validation server-side
+        call.reject("completeMerchantValidation is not needed for Buckaroo's Apple Pay flow")
     }
 
     // MARK: - Helpers
