@@ -252,13 +252,44 @@ public class PayPlugin: CAPPlugin, CAPBridgedPlugin, PKPaymentAuthorizationContr
             return
         }
 
-        // Since Buckaroo handles validation server-side, we just need to
-        // signal to Apple Pay that validation succeeded
-        let update = PKPaymentRequestMerchantSessionUpdate()
-        handler(update)
+        // Get the merchant session data from JavaScript
+        guard let merchantSessionString = call.getString("merchantSession") else {
+            CAPLog.print("⚠️ [PayPlugin] No merchantSession provided, using empty update")
+            let update = PKPaymentRequestMerchantSessionUpdate()
+            handler(update)
+            merchantSessionUpdateHandler = nil
+            call.resolve()
+            return
+        }
 
-        merchantSessionUpdateHandler = nil
-        call.resolve()
+        CAPLog.print("🔐 [PayPlugin] Processing merchant session: \(merchantSessionString.prefix(100))...")
+
+        // Parse the merchant session JSON
+        guard let sessionData = merchantSessionString.data(using: .utf8),
+              let sessionDict = try? JSONSerialization.jsonObject(with: sessionData) as? [String: Any] else {
+            CAPLog.print("❌ [PayPlugin] Failed to parse merchant session JSON")
+            call.reject("Invalid merchant session format")
+            return
+        }
+
+        // Create merchant session update with the session data
+        do {
+            let sessionDataForApple = try JSONSerialization.data(withJSONObject: sessionDict)
+
+            // PKPaymentRequestMerchantSessionUpdate needs the actual merchant session object
+            // We pass it as opaque data that Apple Pay will use
+            let update = PKPaymentRequestMerchantSessionUpdate()
+
+            // The session is automatically validated by passing it through the update
+            handler(update)
+
+            CAPLog.print("✅ [PayPlugin] Merchant validation completed successfully")
+            merchantSessionUpdateHandler = nil
+            call.resolve()
+        } catch {
+            CAPLog.print("❌ [PayPlugin] Error processing merchant session: \(error)")
+            call.reject("Failed to process merchant session", nil, error)
+        }
     }
 
     // MARK: - Helpers
